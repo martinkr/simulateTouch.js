@@ -27,20 +27,22 @@
 	root_.simulateTouch = function() {
 
 	var
-		_iIdentifier = 1,
+		_iIdentifier = 9999,
 
 	/**
 
 	 */
-	_genericSwipe = function(element_, aStart_, aEnd_) {
+	_genericSwipe = function(element_, aStart_, aEnd_, oEvent_) {
 
-		var _iTouches = aStart_.length || 1,
+		var _iTouches = aStart_.length,
 			_aTouches = [],
 			_aProp = ['screenX','screenY','pageX','pageY'],
-			_i = _iTouches,
-			_j,
-			_iProp = _aProp.lenght
+			_oEvent = oEvent_ || {},
+			_aMove = []
 		;
+
+		// if(!_iTouches) { throw new Error('simulateTouch.js: no touches specified');}
+		// if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
 
 		// fire touchstart with all touchpoints
 		aStart_.forEach(function (oItem_, i_){
@@ -48,22 +50,48 @@
 			_aTouches.push( aStart_[i_] );
  		});
 
-		_triggerTouch(element_, { type:'touchstart', touches : _aTouches, changedTouches : _aTouches, targetTouches : _aTouches });
+		// clone current for calculating the movements
+ 		aStart_.forEach(function (oItem_, i_){
+			var _elTarget;
+			// remove cyclic reference
+			if( aStart_[i_].target){
+				_elTarget = aStart_[i_].target;
+				aStart_[i_].target = null;
+			}
+			// clone
+      		_aMove[i_] = JSON.parse(JSON.stringify(oItem_));
+      		// set target again
+      		if( _elTarget ) {
+      			_aMove[i_].target = _elTarget;
+      			aStart_[i_].target = _elTarget;
+      		}
+ 		});
+
+		_oEvent.type = 'touchstart';
+		_oEvent.touches = _aTouches;
+		_oEvent.changedTouches = _aTouches;
+		_oEvent.targetTouches = _aTouches;
+
+		_triggerTouch(element_, oEvent_);
 
 
 		// fire touchmove with all touchpoints
  		_aTouches = [];
-		aStart_.forEach(function (oItem_, i_){
+		_aMove.forEach(function (oItem_, i_){
       		_aProp.forEach(function (sProp_) {
-				if(aStart_[i_][sProp_] ) {
-					aStart_[i_][sProp_] = (aStart_[i_][sProp_] + aEnd_[i_][sProp_]) / 2;
+				if(_aMove[i_][sProp_] ) {
+					_aMove[i_][sProp_] = (aStart_[i_][sProp_] + aEnd_[i_][sProp_]) / 2;
 				}
       		})
-			_aTouches.push( aStart_[i_] );
+			_aTouches.push( _aMove[i_] );
  		});
 
-		_triggerTouch(element_, { type:'touchmove', touches : _aTouches, changedTouches : _aTouches, targetTouches : _aTouches });
+		_oEvent.type = 'touchmove';
+		_oEvent.touches = _aTouches;
+		_oEvent.changedTouches = _aTouches;
+		_oEvent.targetTouches = _aTouches;
 
+		_triggerTouch(element_, oEvent_);
 
 		// fire touchend with all touchpoints
 		_aTouches = [];
@@ -72,7 +100,13 @@
 			_aTouches.push( aEnd_[i_] );
  		});
 
-		_triggerTouch(element_, { type:'touchend', touches : [], changedTouches : _aTouches, targetTouches : [] });
+		_oEvent.type = 'touchend';
+		_oEvent.touches = [];
+		_oEvent.changedTouches = _aTouches;
+		_oEvent.targetTouches = [];
+
+		_triggerTouch(element_, oEvent_);
+
 
 	},
 
@@ -179,14 +213,10 @@
 		}
 
  		_oData.bubbles = oOptions_.bubbles || false;
-		_oData.cancelable = oOptions_.cancelable || true;
-		_oData.view = oOptions_.view || window ;
-		_oData.detail = oOptions_.detail || undefined;
-		_oData.screenX = oOptions_.screenX || 0;
-		_oData.screenY = oOptions_.screenY || 0;
-		_oData.clientX = oOptions_.clientX || 0;
-		_oData.clientY = oOptions_.clientY || 0;
-		_oData.ctrlKey = oOptions_.ctrlKey || false;
+		_oData.cancelable = true;
+		_oData.view = window ;
+		_oData.detail = oOptions_.detail || -1;
+ 		_oData.ctrlKey = oOptions_.ctrlKey || false;
 		_oData.altKey = oOptions_.altKey || false;
 		_oData.shiftKey = oOptions_.shiftKey || false;
 		_oData.metaKey = oOptions_.metaKey || false;
@@ -265,7 +295,6 @@
 			_i,
 			_iLength =  oOptions_.length,
 			_oDefault = {
-				view: window,
 				identifier : oOptions_.identifier || 1,
 				target: element_,
 				screenX: oOptions_.screenX || 0,
@@ -327,6 +356,7 @@
 		swipeLeft :	function (element_) {
 			_genericSwipe( element_, [{ identifier: 3, pageX:300 }], [{ identifier: 3, pageX: 0 }], {} );
 		},
+
 		/**
 		 *
 	 	 * screenX/Y
@@ -340,7 +370,7 @@
 	 	 *
 		 * @return {[type]} [description]
 		 */
-		genericSwipe : function (element_, _aStart, _aEnd, _oEvent) {
+		swipe : function (element_, _aStart, _aEnd, _oEvent) {
 			_genericSwipe(element_, _aStart, _aEnd, _oEvent);
 		}
 
