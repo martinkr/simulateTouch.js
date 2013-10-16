@@ -1,6 +1,6 @@
 /**
  *
- * *.simulateTouch - https://github.com/martinkr/simulateTouch
+ * *.simulateTouch - https://github.com/martinkr/simulateTouch.js
  *
  * *.simulateTouch: enhance your automated tests by simulate touches and gestures!
  *
@@ -341,32 +341,86 @@
 	 */
 	return {
 
+		/**
+		 * Triggers as predefined swipe gesture.
+		 * Direction: up
+		 * Distance: 300px
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		swipeUp : function (element_) {
 			_genericSwipe( element_, [{ identifier: 1, pageY:300 }], [{ identifier: 1, pageY: 0 }], {} );
 		},
 
+		/**
+		 * Triggers as predefined swipe gesture.
+		 * Direction: right
+		 * Distance: 300px
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		swipeRight : function (element_) {
 			_genericSwipe( element_, [{ identifier: 2, pageX:0 }],  [{ identifier: 2, pageX: 300 }], {} );
 		},
 
+		/**
+		 * Triggers as predefined swipe gesture.
+		 * Direction: down
+		 * Distance: 300px
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		swipeDown :	function (element_) {
 			_genericSwipe( element_, [{ identifier: 3, pageY:0 }], [{ identifier: 3, pageY: 300 }], {} );
 		},
 
+		/**
+		 * Triggers as predefined swipe gesture.
+		 * Direction: left
+		 * Distance: 300px
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		swipeLeft :	function (element_) {
 			_genericSwipe( element_, [{ identifier: 3, pageX:300 }], [{ identifier: 3, pageX: 0 }], {} );
 		},
 
 		/**
+		 * Triggers as generic swipe gesture.
+		 * @param  {HTML-Element}	element_ Element to trigger events on
+		 * @param  {Array} _aStart	Array of Objects. Each object contains the details for a single touchpoint's start position.
+		 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
+		 * @param  {Object} _oEvent	Contains the details for the event itself.
 		 *
-		 * screenX/Y
-		 * coordinate of point relative to the screen in pixels
+		 * properties for a single touchpoint
+		 * target
+		 *	The target of this gesture.
+		 * identifier
+		 *	The unique identifier for this touch object.
+		 * pageX
+		 *  The x-coordinate of the touch’s location, in page coordinates.
+		 * pageY
+		 *	The y-coordinate of the touch’s location, in page coordinates.
+		 * screenX
+		 *	The x-coordinate of the event’s location, in screen coordinates.
+		 * screenY
+		 *	The y-coordinate of the event’s location, in screen coordinates.
 		 *
-		 * clientX/Y
-		 *	coordinate of point relative to the viewport in pixels, excluding any scroll offset
+		 * Note: on iOS clientX/Y equals pageX/Y so you can not set them
 		 *
-		 * pageX/Y
-		 *	coordinate of point relative to the viewport in pixels, including any scroll offset
+		 * properties for the event
+		 *
+		 * bubbles
+		 * detail
+		 * ctrlKey
+		 * altKey
+		 * shiftKey
+		 * metaKey
+		 * scale
+		 * rotation
+		 * pageX
+		 * pageY
+		 *
 		 *
 		 * @return {[type]} [description]
 		 */

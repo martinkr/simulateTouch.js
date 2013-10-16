@@ -1,0 +1,35 @@
+{
+    "name": "simulatetouch",
+    "version": "1.0.1",
+    "title": "*.simulateTouch.js",
+    "author": {
+        "name": "Martin Krause",
+        "url": "http://martinkr.github.com/"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "http://opensource.org/licenses/MIT",
+            "type": "GPL-3.0",
+            "url": "http://opensource.org/licenses/gpl-3.0.html"
+        }
+    ],
+    "dependencies": {
+        "jquery": ">1.0"
+    },
+    "description": "enhance your automated tests by simulate touches and gestures!",
+    "keywords": [
+        "tdd",
+        "touch",
+        "gesture",
+        "event-driven",
+        "jasmine",
+        "spec",
+        "test",
+        "automate"
+    ],
+    "bugs": "https://github.com/martinkr/simulateTouch.js/issues",
+    "homepage": "https://github.com/martinkr/simulateTouch.js",
+    "docs": "https://github.com/martinkr/simulateTouch.js",
+    "download": "https://github.com/martinkr/simulateTouch.js/archive/master.zip"
+}

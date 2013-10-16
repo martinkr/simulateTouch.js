@@ -4,7 +4,7 @@
  * Spec for:
  *  simulatetouch.js - https://github.com/martinkr/simulatetouch.js
  *
- * Copyright (c) 2010-2013 Martin Krause (public.mkrause.info)
+ * Copyright (c) 2010-2013 Martin Krause (martinkr.github.com)
  * Dual licensed under the MIT and GPL licenses.
  *
  * @author Martin Krause public@mkrause.info
