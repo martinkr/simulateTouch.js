@@ -29,9 +29,7 @@
 	var
 		_iIdentifier = 9999,
 
-	/**
 
-	 */
 	_genericSwipe = function(element_, aStart_, aEnd_, oEvent_) {
 
 		var _iTouches = aStart_.length,
@@ -119,15 +117,27 @@
 	 * @param  {[type]} iTouches_ [description]
 	 * @return {[type]}	[description]
 	 */
-	_eventGesture = function(element_,oStart_,oEnd_,iTouches_) {
-		// var _iTouches = iTouches_ || 1
-		// ;
+	_genericGesture = function(element_, oStart_, oEnd_, oEvent_) {
 
-		// _triggerTouch(element_, { type:'touchstart', touches : { x: oStart_.x, y: oStart_.y, touches: _iTouches} });
-		// _triggerTouch(element_, { type:'touchmove', touches : { x: oStart_.x+(oEnd_.x/2), y:oStart_.y+(oEnd_.y/2), touches: _iTouches} });
-		// _triggerTouch(element_, { type:'touchend', touches : { x: oEnd_.x, y: oEnd_.y, touches: _iTouches} });
+ 		var _oEvent = oEvent_ || {}
+ 		;
+
+ 		// fire gesturestart
+
+		_oEvent.type = 'gesturestart';
+		_oEvent.rotation = oStart_.rotation;
+		_oEvent.bubbles = oEvent_.bubbles || true;
+		_oEvent.scale = oStart_.scale;
+		_triggerTouch(element_, oEvent_);
+
+		// fire gestureend
+		_oEvent.type = 'gestureend';
+		_oEvent.bubbles = oEvent_.bubbles || true;
+ 		_oEvent.rotation = oEnd_.rotation;
+		_oEvent.scale = oEnd_.scale;
+		_triggerTouch(element_, oEvent_);
+
 	},
-
 
 	/**
 	 * Dispatches the created touch event
@@ -200,18 +210,6 @@
 		;
 
 
-		if (oOptions_.touches) { 
-			_oData.touches = _createTouchList(element_,oOptions_.touches);
-		}
-
-		if (oOptions_.changedTouches) { 
-			_oData.changedTouches = _createTouchList(element_,oOptions_.changedTouches);
-		}
-
-		if (oOptions_.targetTouches) { 
-			_oData.targetTouches = _createTouchList(element_,oOptions_.targetTouches);
-		}
-
 		_oData.bubbles = oOptions_.bubbles || false;
 		_oData.cancelable = true;
 		_oData.view = window ;
@@ -226,12 +224,37 @@
 		_oData.pageX = oOptions_.pageX || _oData.clientX  + window.pageXOffset;
 		_oData.pageY = oOptions_.pageY || _oData.clientY  + window.pageYOffset;
 
-		_event = document.createEvent('TouchEvent');
+		// touch events
+		if(oOptions_.type.indexOf('touch')!==-1){
 
-		_event.initTouchEvent(oOptions_.type, _oData.bubbles, _oData.cancelable, _oData.view,
-						_oData.detail, _oData.screenX, _oData.screenY, _oData.pageX, _oData.pageY, _oData.ctrlKey,
-						_oData.altKey, _oData.shiftKey, _oData.metaKey, _oData.touches, _oData.targetTouches,
-						_oData.changedTouches, _oData.scale, _oData.rotation);
+			if (oOptions_.touches) { 
+				_oData.touches = _createTouchList(element_,oOptions_.touches);
+			}
+
+			if (oOptions_.changedTouches) { 
+				_oData.changedTouches = _createTouchList(element_,oOptions_.changedTouches);
+			}
+
+			if (oOptions_.targetTouches) { 
+				_oData.targetTouches = _createTouchList(element_,oOptions_.targetTouches);
+			}
+
+			_event = document.createEvent('TouchEvent');
+			_event.initTouchEvent(oOptions_.type, _oData.bubbles, _oData.cancelable, _oData.view,
+							_oData.detail, _oData.screenX, _oData.screenY, _oData.pageX, _oData.pageY, _oData.ctrlKey,
+							_oData.altKey, _oData.shiftKey, _oData.metaKey, _oData.touches, _oData.targetTouches,
+							_oData.changedTouches, _oData.scale, _oData.rotation);
+		}
+
+		// gesture events
+		if(oOptions_.type.indexOf('gesture')!==-1){
+
+			_event = document.createEvent('GestureEvent');
+			_event.initGestureEvent(oOptions_.type, _oData.bubbles, _oData.cancelable, _oData.view,
+							_oData.detail, _oData.screenX, _oData.screenY, _oData.pageX, _oData.pageY, _oData.ctrlKey,
+							_oData.altKey, _oData.shiftKey, _oData.metaKey, _oData.target, _oData.scale, _oData.rotation);
+		}
+
 		return _event;
 	},
 
@@ -426,7 +449,27 @@
 		 */
 		swipe : function (element_, _aStart, _aEnd, _oEvent) {
 			_genericSwipe(element_, _aStart, _aEnd, _oEvent);
-		}
+		},
+
+		rotateLeft: function(element_) {
+			_genericGesture( element_, { rotation:0 }, { rotation: 270 }, {} );
+		},
+
+		rotateRight: function(element_) {
+			_genericGesture( element_, { rotation:0 }, { rotation: 90 }, {} );
+		},
+
+		pinchOpen: function(element_) {
+			_genericGesture( element_, { scale:1 }, { scale: 1.5 }, {} );
+		},
+
+		pinchClose: function(element_) {
+			_genericGesture( element_, { scale:1 }, { scale: 0.5 }, {} );
+		},
+
+		gesture: function (element_, oStart_, oEnd_, oEvent_ ) {
+			_genericGesture( element_, oStart_, oEnd_, oEvent_);
+		},
 
 	};
 
