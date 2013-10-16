@@ -129,103 +129,7 @@ describe('simulatetouch.js', function() {
 
 
 	/**
-	 * swipeUp
-	 */
-	it('should trigger touchstart, touchmove and touchend events after swipeUp was called',function () {
-		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
-		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
-		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
-
-		simulateTouch.swipeUp(_element);
-
-		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
-		expect(_fnSpyTouchStart).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
-		expect(_fnSpyTouchMove).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
-		expect(_fnSpyTouchEnd).toHaveBeenCalled();
-
-		// touchend.pageY has to be smaller thand touchstart.pageY
-		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageY > _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageY).toBeTruthy();
-
-	});
-
-	/**
-	 * swipeRight
-	 */
-	it('should trigger touchstart, touchmove and touchend events after swipeRight was called',function () {
-		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
-		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
-		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
-
-		simulateTouch.swipeRight(_element);
-
-		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
-		expect(_fnSpyTouchStart).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
-		expect(_fnSpyTouchMove).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
-		expect(_fnSpyTouchEnd).toHaveBeenCalled();
-
-		// touchend.pageX has to be bigger thand touchstart.pageX
-		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageX < _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageX).toBeTruthy();
-
-	});
-
-	/**
-	 * swipeDown
-	 */
-	it('should trigger touchstart, touchmove and touchend events after swipeDown was called',function () {
-		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
-		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
-		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
-
-		simulateTouch.swipeDown(_element);
-
-		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
-		expect(_fnSpyTouchStart).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
-		expect(_fnSpyTouchMove).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
-		expect(_fnSpyTouchEnd).toHaveBeenCalled();
-
-		// touchend.pageY has to be bigger thand touchstart.pageY
-		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageY < _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageY).toBeTruthy();
-
-	});
-
-	/**
-	 * swipeLeft
-	 */
-	it('should trigger touchstart, touchmove and touchend events after swipeLeft was called',function () {
-		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
-		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
-		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
-
-		simulateTouch.swipeLeft(_element);
-
-		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
-		expect(_fnSpyTouchStart).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
-		expect(_fnSpyTouchMove).toHaveBeenCalled();
-
-		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
-		expect(_fnSpyTouchEnd).toHaveBeenCalled();
-
-		// touchend.pageX has to be smaller thand touchstart.pageX
-		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageX > _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageX).toBeTruthy();
-
-	});
-
-	/**
-	 * swipe
+	 * generic: swipe
 	 */
 	it('should throw an Error if there are no touchpoints on swipe',function () {
 
@@ -679,11 +583,104 @@ describe('simulatetouch.js', function() {
 		// targetTouches are gone
 		expect(window.oResults.eventEnd.targetTouches.length).toBe(0);
 
-
-
 	});
 
 
+	/**
+	 * predefined: swipeUp
+	 */
+	it('should trigger touchstart, touchmove and touchend events after swipeUp was called',function () {
+		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
+		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
+		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
+
+		simulateTouch.swipeUp(_element);
+
+		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
+		expect(_fnSpyTouchStart).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
+		expect(_fnSpyTouchMove).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
+		expect(_fnSpyTouchEnd).toHaveBeenCalled();
+
+		// touchend.pageY has to be smaller thand touchstart.pageY
+		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageY > _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageY).toBeTruthy();
+
+	});
+
+	/**
+	 * predefined: swipeRight
+	 */
+	it('should trigger touchstart, touchmove and touchend events after swipeRight was called',function () {
+		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
+		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
+		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
+
+		simulateTouch.swipeRight(_element);
+
+		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
+		expect(_fnSpyTouchStart).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
+		expect(_fnSpyTouchMove).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
+		expect(_fnSpyTouchEnd).toHaveBeenCalled();
+
+		// touchend.pageX has to be bigger thand touchstart.pageX
+		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageX < _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageX).toBeTruthy();
+
+	});
+
+	/**
+	 * predefined: swipeDown
+	 */
+	it('should trigger touchstart, touchmove and touchend events after swipeDown was called',function () {
+		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
+		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
+		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
+
+		simulateTouch.swipeDown(_element);
+
+		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
+		expect(_fnSpyTouchStart).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
+		expect(_fnSpyTouchMove).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
+		expect(_fnSpyTouchEnd).toHaveBeenCalled();
+
+		// touchend.pageY has to be bigger thand touchstart.pageY
+		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageY < _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageY).toBeTruthy();
+
+	});
+
+	/**
+	 * predefined: swipeLeft
+	 */
+	it('should trigger touchstart, touchmove and touchend events after swipeLeft was called',function () {
+		expect(_fnSpyTouchStart).not.toHaveBeenCalled();
+		expect(_fnSpyTouchMove).not.toHaveBeenCalled();
+		expect(_fnSpyTouchEnd).not.toHaveBeenCalled();
+
+		simulateTouch.swipeLeft(_element);
+
+		expect(window.oResults._fnSpyTouchStart).toBeTruthy();
+		expect(_fnSpyTouchStart).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchMove).toBeTruthy();
+		expect(_fnSpyTouchMove).toHaveBeenCalled();
+
+		expect(window.oResults._fnSpyTouchEnd).toBeTruthy();
+		expect(_fnSpyTouchEnd).toHaveBeenCalled();
+
+		// touchend.pageX has to be smaller thand touchstart.pageX
+		expect(_fnSpyTouchStart.mostRecentCall.args[0].changedTouches[0].pageX > _fnSpyTouchEnd.mostRecentCall.args[0].changedTouches[0].pageX).toBeTruthy();
+
+	});
 
 
 });
