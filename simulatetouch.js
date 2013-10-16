@@ -41,17 +41,17 @@
 			_aMove = []
 		;
 
-		// if(!_iTouches) { throw new Error('simulateTouch.js: no touches specified');}
-		// if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
+		if(!_iTouches) { throw new Error('simulateTouch.js: no touches specified');}
+		if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
 
 		// fire touchstart with all touchpoints
 		aStart_.forEach(function (oItem_, i_){
-      		aStart_[i_].identifier = ( !aStart_[i_].identifier ) ? _iIdentifier+''+1 : aStart_[i_].identifier;
+			aStart_[i_].identifier = ( !aStart_[i_].identifier ) ? _iIdentifier+''+1 : aStart_[i_].identifier;
 			_aTouches.push( aStart_[i_] );
- 		});
+		});
 
 		// clone current for calculating the movements
- 		aStart_.forEach(function (oItem_, i_){
+		aStart_.forEach(function (oItem_, i_){
 			var _elTarget;
 			// remove cyclic reference
 			if( aStart_[i_].target){
@@ -59,13 +59,13 @@
 				aStart_[i_].target = null;
 			}
 			// clone
-      		_aMove[i_] = JSON.parse(JSON.stringify(oItem_));
-      		// set target again
-      		if( _elTarget ) {
-      			_aMove[i_].target = _elTarget;
-      			aStart_[i_].target = _elTarget;
-      		}
- 		});
+			_aMove[i_] = JSON.parse(JSON.stringify(oItem_));
+			// set target again
+			if( _elTarget ) {
+				_aMove[i_].target = _elTarget;
+				aStart_[i_].target = _elTarget;
+			}
+		});
 
 		_oEvent.type = 'touchstart';
 		_oEvent.touches = _aTouches;
@@ -76,15 +76,15 @@
 
 
 		// fire touchmove with all touchpoints
- 		_aTouches = [];
+		_aTouches = [];
 		_aMove.forEach(function (oItem_, i_){
-      		_aProp.forEach(function (sProp_) {
+			_aProp.forEach(function (sProp_) {
 				if(_aMove[i_][sProp_] ) {
 					_aMove[i_][sProp_] = (aStart_[i_][sProp_] + aEnd_[i_][sProp_]) / 2;
 				}
-      		})
+			});
 			_aTouches.push( _aMove[i_] );
- 		});
+		});
 
 		_oEvent.type = 'touchmove';
 		_oEvent.touches = _aTouches;
@@ -96,9 +96,9 @@
 		// fire touchend with all touchpoints
 		_aTouches = [];
 		aEnd_.forEach(function (oItem_, i_){
-      		aEnd_[i_].identifier = ( !aEnd_[i_].identifier ) ? aStart_[i_].identifier : aEnd_[i_].identifier;
+			aEnd_[i_].identifier = ( !aEnd_[i_].identifier ) ? aStart_[i_].identifier : aEnd_[i_].identifier;
 			_aTouches.push( aEnd_[i_] );
- 		});
+		});
 
 		_oEvent.type = 'touchend';
 		_oEvent.touches = [];
@@ -117,7 +117,7 @@
 	 * @param  {[type]} oStart_   [description]
 	 * @param  {[type]} oEnd_     [description]
 	 * @param  {[type]} iTouches_ [description]
-	 * @return {[type]}           [description]
+	 * @return {[type]}	[description]
 	 */
 	_eventGesture = function(element_,oStart_,oEnd_,iTouches_) {
 		// var _iTouches = iTouches_ || 1
@@ -148,7 +148,7 @@
 	 * Creates a touch event and set the given properties
 	 * @see https://developer.apple.com/library/safari/documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html#//apple_ref/javascript/instm/TouchEvent/initTouchEvent
 	 * initTouchEvent (
-	 * 	type,
+	 *	type,
 	 *	canBubble, // ios: but implemented as "bubbles" ?!
 	 *	cancelable,
 	 *	view,
@@ -172,26 +172,26 @@
 	 * coordinate of point relative to the screen in pixels
 	 *
 	 * clientX/Y
-	 * 	coordinate of point relative to the viewport in pixels, excluding any scroll offset
+	 *	coordinate of point relative to the viewport in pixels, excluding any scroll offset
 	 *
 	 *
 	 * @see http://www.w3.org/TR/touch-events/#touchevent-interface
 	 *
 	 * changedTouches of type TouchList, readonly
- 	 *  a list of Touches for every point of contact which contributed to the event.
- 	 * 	For the touchstart event this must be a list of the touch points that just became active with the current event.
- 	 * 	For the touchmove event this must be a list of the touch points that have moved since the last event.
- 	 * 	For the touchend and touchcancel events this must be a list of the touch points that have just been removed from the surface.
- 	 *
- 	 * targetTouches of type TouchList, readonly
+	 *  a list of Touches for every point of contact which contributed to the event.
+	 *	For the touchstart event this must be a list of the touch points that just became active with the current event.
+	 *	For the touchmove event this must be a list of the touch points that have moved since the last event.
+	 *	For the touchend and touchcancel events this must be a list of the touch points that have just been removed from the surface.
+	 *
+	 * targetTouches of type TouchList, readonly
 	 *  a list of Touches for every point of contact that is touching the surface and
 	 *  started on the element that is the target of the current event.
- 	 *
- 	 * touches of type TouchList, readonly
+	 *
+	 * touches of type TouchList, readonly
 	 *  a list of Touches for every point of contact currently touching the surface.
- 	 *
+	 *
 	 * @param  {Object} oOptions_ the event properties
-	 * @return {TouchEvent}           touch event
+	 * @return {TouchEvent}	touch event
 	 */
 	_setupEvent = function(element_,oOptions_) {
 
@@ -212,11 +212,11 @@
 			_oData.targetTouches = _createTouchList(element_,oOptions_.targetTouches);
 		}
 
- 		_oData.bubbles = oOptions_.bubbles || false;
+		_oData.bubbles = oOptions_.bubbles || false;
 		_oData.cancelable = true;
 		_oData.view = window ;
 		_oData.detail = oOptions_.detail || -1;
- 		_oData.ctrlKey = oOptions_.ctrlKey || false;
+		_oData.ctrlKey = oOptions_.ctrlKey || false;
 		_oData.altKey = oOptions_.altKey || false;
 		_oData.shiftKey = oOptions_.shiftKey || false;
 		_oData.metaKey = oOptions_.metaKey || false;
@@ -226,7 +226,7 @@
 		_oData.pageX = oOptions_.pageX || _oData.clientX  + window.pageXOffset;
 		_oData.pageY = oOptions_.pageY || _oData.clientY  + window.pageYOffset;
 
- 		_event = document.createEvent('TouchEvent');
+		_event = document.createEvent('TouchEvent');
 
 		_event.initTouchEvent(oOptions_.type, _oData.bubbles, _oData.cancelable, _oData.view,
 						_oData.detail, _oData.screenX, _oData.screenY, _oData.pageX, _oData.pageY, _oData.ctrlKey,
@@ -258,30 +258,30 @@
 	 * coordinate of point relative to the screen in pixels
 	 *
 	 * clientX/Y
-	 * 	coordinate of point relative to the viewport in pixels, excluding any scroll offset
+	 *	coordinate of point relative to the viewport in pixels, excluding any scroll offset
 	 *
 	 * pageX/Y
-	 * 	coordinate of point relative to the viewport in pixels, including any scroll offset
+	 *	coordinate of point relative to the viewport in pixels, including any scroll offset
 	 *
 	 * TouchList {
-	 * 	touches
+	 *	touches
 	 * }
 	 *
 	 * @see https://developer.apple.com/library/safari/documentation/UserExperience/Reference/DocumentAdditionsReference/DocumentAdditions/DocumentAdditions.html
 	 * view
-	 * 	The view (DOM window) in which the event occurred.
+	 *	The view (DOM window) in which the event occurred.
 	 * target
-	 * 	The target of this gesture.
+	 *	The target of this gesture.
 	 * identifier
-	 * 	The unique identifier for this touch object.
+	 *	The unique identifier for this touch object.
 	 * pageX
 	 *  The x-coordinate of the touch’s location, in page coordinates.
 	 * pageY
-	 * 	The y-coordinate of the touch’s location, in page coordinates.
+	 *	The y-coordinate of the touch’s location, in page coordinates.
 	 * screenX
-	 * 	The x-coordinate of the event’s location, in screen coordinates.
+	 *	The x-coordinate of the event’s location, in screen coordinates.
 	 * screenY
-	 * 	The y-coordinate of the event’s location, in screen coordinates.
+	 *	The y-coordinate of the event’s location, in screen coordinates.
 	 *
 	 * iOS7: clientX/Y == pageX/Y
 	 *
@@ -333,7 +333,7 @@
 
 		// create touchlist
 		return document.createTouchList.apply(document,_aTouches);
- 	};
+	};
 
 
 	/**
@@ -359,15 +359,15 @@
 
 		/**
 		 *
-	 	 * screenX/Y
+		 * screenX/Y
 		 * coordinate of point relative to the screen in pixels
 		 *
 		 * clientX/Y
-		 * 	coordinate of point relative to the viewport in pixels, excluding any scroll offset
+		 *	coordinate of point relative to the viewport in pixels, excluding any scroll offset
 		 *
 		 * pageX/Y
-		 * 	coordinate of point relative to the viewport in pixels, including any scroll offset
-	 	 *
+		 *	coordinate of point relative to the viewport in pixels, including any scroll offset
+		 *
 		 * @return {[type]} [description]
 		 */
 		swipe : function (element_, _aStart, _aEnd, _oEvent) {
