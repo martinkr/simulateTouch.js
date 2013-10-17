@@ -11,6 +11,11 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
 	simulateTouch.swipeDown(element);
 	simulateTouch.swipeLeft(element);
 	simulateTouch.swipe(element,aStart,aEnd,oEvent);
+	simulateTouch.rotateLeft(element_)
+	simulateTouch.rotateRight(element_)
+	simulateTouch.pinchOpen(element_)
+	simulateTouch.pinchClose(element_)
+	simulateTouch.gesture (element_, oStart_, oEnd_, oEvent_ )
 </pre>
 
 
@@ -43,10 +48,10 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
 ## Generic Swipe
 
 ### simulateTouch.swipe
-- @param  {HTML-Element}element_ Element to trigger events on
-- @param  {Array} _aStartArray of Objects. Each object contains the details for a single touchpoint's start position.
-- @param  {Array} _aEndArray of Objects. Each object contains the details for a single touchpoint's end position.
-- @param  {Object} _oEventContains the details for the event itself.
+- @param  {HTML-Element} element_ Element to trigger events on
+- @param  {Array} _aStart Array of Objects. Each object contains the details for a single touchpoint's start position.
+- @param  {Array} _aEnd Array of Objects. Each object contains the details for a single touchpoint's end position.
+- @param  {Object} _oEvent Contains the details for the event itself.
 
 #### properties for a single touchpoint
  - target: The target of this gesture.
@@ -58,7 +63,6 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
  -  Note: on iOS clientX/Y equals pageX/Y so you can not set them
 
 #### properties for the event
-
  - bubbles
  - detail
  - ctrlKey
@@ -70,6 +74,46 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
  - pageX
  - pageY
 
+
+### simulateTouch.rotateLeft
+ - Direction: left
+ - Distance: 90deg
+ - @param  {HTML-Element} element_ Element to trigger events on
+
+### simulateTouch.rotateRight
+ - Direction: right
+ - Distance: 90deg
+ - @param  {HTML-Element} element_ Element to trigger events on
+
+### simulateTouch.pinchOpen
+ - Direction: move touchpoints away
+ - Distance: 0.5
+ - @param  {HTML-Element} element_ Element to trigger events on
+
+### simulateTouch.pinchOpen
+ - Direction: move touchpoints together
+ - Distance: 0.5
+ - @param  {HTML-Element} element_ Element to trigger events on
+
+### simulateTouch.gesture
+ - @param  {HTML-Element}	element_ Element to trigger events on
+ - @param  {Array} _oStart	An Object containing the details for the gestures start position.
+ - @param  {Array} _oEnd	An Object containing the details for the gestures end position.
+ - @param  {Object} _oEvent	Contains the details for the event itself.
+
+#### properties for the  start / end Object
+ - rotation
+ - scale
+
+#### properties for the event
+ - bubbles
+ - detail
+ - ctrlKey
+ - altKey
+ - shiftKey
+ - metaKey
+ - pageX
+ - pageY
 
 ## Requires
 - Safari and iOS

@@ -5,7 +5,7 @@
  * *.simulateTouch: enhance your automated tests by simulate touches and gestures!
  *
  *
- * @Version: 1.0
+ * @Version: 1.1.0
  *
  * @example:
  *
@@ -20,6 +20,8 @@
  *
  */
 
+/* add duration via settimeout */
+/* tap double tap lond press two finger tap*/
 /* jshint browser:true, jquery:true, strict: false, smarttabs:true, onevar:true, undef:true, unused:true, curly:true, latedef: true, sub:true */
 /* global jQuery:true, $:true */
 
@@ -119,10 +121,10 @@
 	 */
 	_genericGesture = function(element_, oStart_, oEnd_, oEvent_) {
 
- 		var _oEvent = oEvent_ || {}
- 		;
+		var _oEvent = oEvent_ || {}
+		;
 
- 		// fire gesturestart
+		// fire gesturestart
 
 		_oEvent.type = 'gesturestart';
 		_oEvent.rotation = oStart_.rotation;
@@ -133,7 +135,7 @@
 		// fire gestureend
 		_oEvent.type = 'gestureend';
 		_oEvent.bubbles = oEvent_.bubbles || true;
- 		_oEvent.rotation = oEnd_.rotation;
+		_oEvent.rotation = oEnd_.rotation;
 		_oEvent.scale = oEnd_.scale;
 		_triggerTouch(element_, oEvent_);
 
@@ -313,8 +315,7 @@
 	 */
 	_createTouchList = function(element_,oOptions_) {
 
-		var _oTouches,
-			_aTouches = [],
+		var _aTouches = [],
 			_i,
 			_iLength =  oOptions_.length,
 			_oDefault = {
@@ -365,7 +366,7 @@
 	return {
 
 		/**
-		 * Triggers as predefined swipe gesture.
+		 * Triggers a predefined swipe gesture.
 		 * Direction: up
 		 * Distance: 300px
 		 * @param  {HTML-Element} element_ Element to trigger events on
@@ -376,7 +377,7 @@
 		},
 
 		/**
-		 * Triggers as predefined swipe gesture.
+		 * Triggers a predefined swipe gesture.
 		 * Direction: right
 		 * Distance: 300px
 		 * @param  {HTML-Element} element_ Element to trigger events on
@@ -387,7 +388,7 @@
 		},
 
 		/**
-		 * Triggers as predefined swipe gesture.
+		 * Triggers a predefined swipe gesture.
 		 * Direction: down
 		 * Distance: 300px
 		 * @param  {HTML-Element} element_ Element to trigger events on
@@ -398,7 +399,7 @@
 		},
 
 		/**
-		 * Triggers as predefined swipe gesture.
+		 * Triggers a predefined swipe gesture.
 		 * Direction: left
 		 * Distance: 300px
 		 * @param  {HTML-Element} element_ Element to trigger events on
@@ -409,7 +410,7 @@
 		},
 
 		/**
-		 * Triggers as generic swipe gesture.
+		 * Triggers a generic swipe gesture.
 		 * @param  {HTML-Element}	element_ Element to trigger events on
 		 * @param  {Array} _aStart	Array of Objects. Each object contains the details for a single touchpoint's start position.
 		 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
@@ -432,7 +433,6 @@
 		 * Note: on iOS clientX/Y equals pageX/Y so you can not set them
 		 *
 		 * properties for the event
-		 *
 		 * bubbles
 		 * detail
 		 * ctrlKey
@@ -444,32 +444,82 @@
 		 * pageX
 		 * pageY
 		 *
-		 *
-		 * @return {[type]} [description]
+		 * @return {Void}
 		 */
 		swipe : function (element_, _aStart, _aEnd, _oEvent) {
 			_genericSwipe(element_, _aStart, _aEnd, _oEvent);
 		},
 
+		/**
+		 * Triggers a predefined rotation gesture.
+		 * Direction: left
+		 * Distance: 90deg
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		rotateLeft: function(element_) {
 			_genericGesture( element_, { rotation:0 }, { rotation: 270 }, {} );
 		},
 
+		/**
+		 * Triggers a predefined rotation gesture.
+		 * Direction: right
+		 * Distance: 90deg
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		rotateRight: function(element_) {
 			_genericGesture( element_, { rotation:0 }, { rotation: 90 }, {} );
 		},
 
+		/**
+		 * Triggers a predefined pinch gesture.
+		 * Direction: move touchpoints away
+		 * Distance: 0.5
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		pinchOpen: function(element_) {
 			_genericGesture( element_, { scale:1 }, { scale: 1.5 }, {} );
 		},
 
+		/**
+		 * Triggers a predefined pinch gesture.
+		 * Direction: move touchpoints together
+		 * Distance: 0.5
+		 * @param  {HTML-Element} element_ Element to trigger events on
+		 * @return {Void}
+		 */
 		pinchClose: function(element_) {
 			_genericGesture( element_, { scale:1 }, { scale: 0.5 }, {} );
 		},
 
+		/**
+		 * Triggers a generic gesture.
+		 * @param  {HTML-Element}	element_ Element to trigger events on
+		 * @param  {Array} _oStart	An Object containing the details for the gestures start position.
+		 * @param  {Array} _oEnd	An Object containing the details for the gestures end position.
+		 * @param  {Object} _oEvent	Contains the details for the event itself.
+		 *
+		 * properties for a single touchpoint
+		 * rotation
+		 * scale
+		 *
+		 * properties for the event
+		 * bubbles
+		 * detail
+		 * ctrlKey
+		 * altKey
+		 * shiftKey
+		 * metaKey
+		 * pageX
+		 * pageY
+		 *
+		 * @return {Void}
+		 */
 		gesture: function (element_, oStart_, oEnd_, oEvent_ ) {
 			_genericGesture( element_, oStart_, oEnd_, oEvent_);
-		},
+		}
 
 	};
 
