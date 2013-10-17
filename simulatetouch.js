@@ -31,7 +31,13 @@
 	var
 		_iIdentifier = 9999,
 
-
+	/**
+	 * Triggers a generic swipe gesture.
+	 * @param  {HTML-Element}	element_ Element to trigger events on
+	 * @param  {Array} _aStart	Array of Objects. Each object contains the details for a single touchpoint's start position.
+	 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
+	 * @param  {Object} _oEvent	Contains the details for the event itself.
+	 */
 	_genericSwipe = function(element_, aStart_, aEnd_, oEvent_) {
 
 		var _iTouches = aStart_.length,
@@ -41,6 +47,7 @@
 			_aMove = []
 		;
 
+		// check for necessary information
 		if(!_iTouches) { throw new Error('simulateTouch.js: no touches specified');}
 		if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
 
@@ -67,6 +74,7 @@
 			}
 		});
 
+		// touchstart: toches == changedTouches == targetTouches
 		_oEvent.type = 'touchstart';
 		_oEvent.touches = _aTouches;
 		_oEvent.changedTouches = _aTouches;
@@ -86,6 +94,7 @@
 			_aTouches.push( _aMove[i_] );
 		});
 
+		// touchmove: toches == changedTouches == targetTouches
 		_oEvent.type = 'touchmove';
 		_oEvent.touches = _aTouches;
 		_oEvent.changedTouches = _aTouches;
@@ -100,6 +109,7 @@
 			_aTouches.push( aEnd_[i_] );
 		});
 
+		// touchend: changedTouches only
 		_oEvent.type = 'touchend';
 		_oEvent.touches = [];
 		_oEvent.changedTouches = _aTouches;
@@ -229,6 +239,8 @@
 		// touch events
 		if(oOptions_.type.indexOf('touch')!==-1){
 
+			// set touchlists containing single touches
+
 			if (oOptions_.touches) { 
 				_oData.touches = _createTouchList(element_,oOptions_.touches);
 			}
@@ -241,17 +253,21 @@
 				_oData.targetTouches = _createTouchList(element_,oOptions_.targetTouches);
 			}
 
+			// create event
 			_event = document.createEvent('TouchEvent');
+			// initialize event with all necessary options
 			_event.initTouchEvent(oOptions_.type, _oData.bubbles, _oData.cancelable, _oData.view,
 							_oData.detail, _oData.screenX, _oData.screenY, _oData.pageX, _oData.pageY, _oData.ctrlKey,
 							_oData.altKey, _oData.shiftKey, _oData.metaKey, _oData.touches, _oData.targetTouches,
 							_oData.changedTouches, _oData.scale, _oData.rotation);
 		}
 
-		// gesture events
+		// gesture events: no touchlists!
 		if(oOptions_.type.indexOf('gesture')!==-1){
 
+			// create event
 			_event = document.createEvent('GestureEvent');
+			// initialize event with all necessary options
 			_event.initGestureEvent(oOptions_.type, _oData.bubbles, _oData.cancelable, _oData.view,
 							_oData.detail, _oData.screenX, _oData.screenY, _oData.pageX, _oData.pageY, _oData.ctrlKey,
 							_oData.altKey, _oData.shiftKey, _oData.metaKey, _oData.target, _oData.scale, _oData.rotation);
