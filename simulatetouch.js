@@ -30,6 +30,69 @@
 
 	var
 		_iIdentifier = 9999,
+		_id = 1,
+		_oQueue = {},
+		_timer =null,
+
+	/**
+	 * Entry point for all swipe gestures.
+	 * Prepares the options and pushes this specific
+	 * gesture to the queue
+	 * @param  {HTML-Element} element_	Element to trigger the event on
+	 * @param  {Array} _aStart	Array of Objects. Each object contains the details for a single touchpoint's start position.
+	 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
+	 * @param  {Object} _oEvent	Contains the details for the event itself.
+	 * @return {Void}
+	 */
+	_genericSwipe = function(element_, aStart_, aEnd_, oEvent_) {
+
+		var _iDuration  = oEvent_.duration || 60 ;
+
+		// check for necessary information
+		if(!aStart_.length) { throw new Error('simulateTouch.js: no touches specified');}
+		if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
+
+		delete oEvent_.duration;
+
+		// construct queue for all events
+		_oQueue[++_id] =  {
+			id: _id,
+			phase : 0,
+			counter: Math.ceil(_iDuration / 20) ,
+			duration : _iDuration,
+			steps :  Math.ceil(_iDuration / 20) ,
+			fn: 'doGenericSwipe',
+			args : {
+				element : element_,
+				aStart : aStart_,
+				aEnd : aEnd_,
+				oEvent : oEvent_
+			}
+
+		};
+		// _doGenericSwipe.apply(this,_oQueue[_id].args);
+		// _doGenericSwipe(element_, aStart_, aEnd_, oEvent_,_id);
+		_setInterval();
+	},
+
+	/**
+	 * Set the interval if necessary and
+	 * executes the swipe functions periodically
+	 * @return {Void}
+	 */
+	_setInterval = function () {
+		if (_timer) { return; }
+		_timer = setInterval(function(){
+			console.log('tick item ins queue: ', Object.keys(_oQueue).length)
+			if (Object.keys(_oQueue).length) {
+				Object.keys(_oQueue).forEach(function(id_) {
+					root_.simulateTouch[_oQueue[id_].fn](_oQueue[id_]);
+				});
+			} else {
+				_timer = window.clearInterval(_timer);
+			}
+		}, 20);
+	},
 
 	/**
 	 * Triggers a generic swipe gesture.
@@ -38,85 +101,122 @@
 	 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
 	 * @param  {Object} _oEvent	Contains the details for the event itself.
 	 */
-	_genericSwipe = function(element_, aStart_, aEnd_, oEvent_) {
+	_doGenericSwipe = function(oOptions_) {
 
-		var _iTouches = aStart_.length,
+		var
 			_aTouches = [],
 			_aProp = ['screenX','screenY','pageX','pageY'],
-			_oEvent = oEvent_ || {},
-			_aMove = []
+			_oEvent = oOptions_.args.oEvent || {},
+			_aStart = oOptions_.args.aStart,
+			_aEnd = oOptions_.args.aEnd,
+			_aMove = [],
+			element_ = oOptions_.args.element
 		;
 
-		// check for necessary information
-		if(!_iTouches) { throw new Error('simulateTouch.js: no touches specified');}
-		if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
+		// decrease calls
+		oOptions_.counter--;
 
-		// fire touchstart with all touchpoints
-		aStart_.forEach(function (oItem_, i_){
-			aStart_[i_].identifier = ( !aStart_[i_].identifier ) ? _iIdentifier+''+1 : aStart_[i_].identifier;
-			_aTouches.push( aStart_[i_] );
-		});
+		// decide which touch should be fired
+		switch (oOptions_.phase) {
 
-		// clone current for calculating the movements
-		aStart_.forEach(function (oItem_, i_){
-			var _elTarget;
-			// remove cyclic reference
-			if( aStart_[i_].target){
-				_elTarget = aStart_[i_].target;
-				aStart_[i_].target = null;
-			}
-			// clone
-			_aMove[i_] = JSON.parse(JSON.stringify(oItem_));
-			// set target again
-			if( _elTarget ) {
-				_aMove[i_].target = _elTarget;
-				aStart_[i_].target = _elTarget;
-			}
-		});
+			// start: once
+			case 0:
+				// check for necessary information
+				if(!_aStart.length) { throw new Error('simulateTouch.js: no touches specified');}
+				if(_aStart.length !== _aEnd.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
 
-		// touchstart: toches == changedTouches == targetTouches
-		_oEvent.type = 'touchstart';
-		_oEvent.touches = _aTouches;
-		_oEvent.changedTouches = _aTouches;
-		_oEvent.targetTouches = _aTouches;
+				// fire touchstart with all touchpoints
+				_aStart.forEach(function (oItem_, i_){
+					_aStart[i_].identifier = ( !_aStart[i_].identifier ) ? _iIdentifier+''+1 : _aStart[i_].identifier;
+					_aTouches.push( _aStart[i_] );
+				});
 
-		_triggerTouch(element_, oEvent_);
+				// clone current for calculating the movements
+				_aStart.forEach(function (oItem_, i_){
+					var _elTarget;
+					// remove cyclic reference
+					if( _aStart[i_].target){
+						_elTarget = _aStart[i_].target;
+						_aStart[i_].target = null;
+					}
+					// clone
+					_aMove[i_] = JSON.parse(JSON.stringify(oItem_));
+					// set target again
+					if( _elTarget ) {
+						_aMove[i_].target = _elTarget;
+						_aStart[i_].target = _elTarget;
+					}
+				});
 
+				// cache clone
+				oOptions_._aMove = _aMove  ;
 
-		// fire touchmove with all touchpoints
-		_aTouches = [];
-		_aMove.forEach(function (oItem_, i_){
-			_aProp.forEach(function (sProp_) {
-				if(_aMove[i_][sProp_] ) {
-					_aMove[i_][sProp_] = (aStart_[i_][sProp_] + aEnd_[i_][sProp_]) / 2;
-				}
-			});
-			_aTouches.push( _aMove[i_] );
-		});
+				// touchstart: toches == changedTouches == targetTouches
+				_oEvent.type = 'touchstart';
+				_oEvent.touches = _aTouches;
+				_oEvent.changedTouches = _aTouches;
+				_oEvent.targetTouches = _aTouches;
 
-		// touchmove: toches == changedTouches == targetTouches
-		_oEvent.type = 'touchmove';
-		_oEvent.touches = _aTouches;
-		_oEvent.changedTouches = _aTouches;
-		_oEvent.targetTouches = _aTouches;
+				oOptions_.phase++;
 
-		_triggerTouch(element_, oEvent_);
+			break;
 
-		// fire touchend with all touchpoints
-		_aTouches = [];
-		aEnd_.forEach(function (oItem_, i_){
-			aEnd_[i_].identifier = ( !aEnd_[i_].identifier ) ? aStart_[i_].identifier : aEnd_[i_].identifier;
-			_aTouches.push( aEnd_[i_] );
-		});
+			// move: multiple times
+			case 1:
+				// fire touchmove with all touchpoints
+				_aTouches = [];
+				// grab clone
+				_aMove = oOptions_._aMove;
+				// calculate movement
+				_aMove.forEach(function (oItem_, i_){
+					_aProp.forEach(function (sProp_) {
+						var _iStepDelta = 0,
+						_iDirection = (_aStart[i_][sProp_] > _aEnd[i_][sProp_]) ? -1 : +1 ;
+						if(_aMove[i_][sProp_] ) {
+							_iStepDelta = Math.abs(_aStart[i_][sProp_] - _aEnd[i_][sProp_]) / oOptions_.steps;
+							_aMove[i_][sProp_] += ( _iDirection * (_iStepDelta) );
+							// console.log(' ---- ')
+							// console.log(oOptions_.counter,_aStart[i_][sProp_] ,_aEnd[i_][sProp_], ' ---- move to ', _iDirection , (_iStepDelta), ' to ', _aMove[i_][sProp_])
+						}
+					});
+					_aTouches.push( _aMove[i_] );
+				});
 
-		// touchend: changedTouches only
-		_oEvent.type = 'touchend';
-		_oEvent.touches = [];
-		_oEvent.changedTouches = _aTouches;
-		_oEvent.targetTouches = [];
+				// touchmove: toches == changedTouches == targetTouches
+				_oEvent.type = 'touchmove';
+				_oEvent.touches = _aTouches;
+				_oEvent.changedTouches = _aTouches;
+				_oEvent.targetTouches = _aTouches;
 
-		_triggerTouch(element_, oEvent_);
+				// one call left, send touchend next
+				if (oOptions_.counter === 1 ) {oOptions_.phase++;}
 
+			break;
+
+			// end: once
+			case 2:
+				// fire touchend with all touchpoints
+				_aTouches = [];
+				_aEnd.forEach(function (oItem_, i_){
+					_aEnd[i_].identifier = ( !_aEnd[i_].identifier ) ? _aStart[i_].identifier : _aEnd[i_].identifier;
+					_aTouches.push( _aEnd[i_] );
+				});
+
+				// touchend: changedTouches only
+				_oEvent.type = 'touchend';
+				_oEvent.touches = [];
+				_oEvent.changedTouches = _aTouches;
+				_oEvent.targetTouches = [];
+
+				// done for this id
+				delete _oQueue[oOptions_.id];
+
+			break;
+
+		}
+
+		// fire!
+		_triggerTouch(element_, _oEvent);
 
 	},
 
@@ -125,29 +225,82 @@
 	 * simulates a gesture
 	 * @param  {[type]} element_  [description]
 	 * @param  {[type]} oStart_   [description]
-	 * @param  {[type]} oEnd_     [description]
+	 * @param  {[type]} oEnd_	[description]
 	 * @param  {[type]} iTouches_ [description]
 	 * @return {[type]}	[description]
 	 */
 	_genericGesture = function(element_, oStart_, oEnd_, oEvent_) {
 
-		var _oEvent = oEvent_ || {}
+		var _oEvent = oEvent_ || {}
 		;
 
 		// fire gesturestart
 
 		_oEvent.type = 'gesturestart';
 		_oEvent.rotation = oStart_.rotation;
-		_oEvent.bubbles = oEvent_.bubbles || true;
+		_oEvent.bubbles = oEvent_.bubbles || true;
 		_oEvent.scale = oStart_.scale;
 		_triggerTouch(element_, oEvent_);
 
 		// fire gestureend
 		_oEvent.type = 'gestureend';
-		_oEvent.bubbles = oEvent_.bubbles || true;
+		_oEvent.bubbles = oEvent_.bubbles || true;
 		_oEvent.rotation = oEnd_.rotation;
 		_oEvent.scale = oEnd_.scale;
 		_triggerTouch(element_, oEvent_);
+
+	},
+
+	_doGenericGesture = function(oOptions_) {
+
+		var
+			_aTouches = [],
+			_aProp = ['screenX','screenY','pageX','pageY'],
+			_oEvent = oOptions_.args.oEvent || {},
+			_aStart = oOptions_.args.aStart,
+			_aEnd = oOptions_.args.aEnd,
+			_aMove = [],
+			element_ = oOptions_.args.element
+		;
+
+		// decrease calls
+		oOptions_.counter--;
+
+		// decide which touch should be fired
+		switch (oOptions_.phase) {
+
+			// start: once
+			case 0:
+
+				// one call left, send touchend next
+				if (oOptions_.counter === 1 ) {oOptions_.phase++;}
+
+			break;
+
+			// end: once
+			case 2:
+				// fire touchend with all touchpoints
+				_aTouches = [];
+				_aEnd.forEach(function (oItem_, i_){
+					_aEnd[i_].identifier = ( !_aEnd[i_].identifier ) ? _aStart[i_].identifier : _aEnd[i_].identifier;
+					_aTouches.push( _aEnd[i_] );
+				});
+
+				// touchend: changedTouches only
+				_oEvent.type = 'touchend';
+				_oEvent.touches = [];
+				_oEvent.changedTouches = _aTouches;
+				_oEvent.targetTouches = [];
+
+				// done for this id
+				delete _oQueue[oOptions_.id];
+
+			break;
+
+		}
+
+		// fire!
+		_triggerTouch(element_, _oEvent);
 
 	},
 
@@ -160,6 +313,8 @@
 	 * @return {Void}
 	 */
 	_triggerTouch = function(element_,oOptions_) {
+		// touchend: changedTouches only
+		console.log('## TRIGGER TOUCH', oOptions_.type,arguments)
 		var _event = _setupEvent(element_,oOptions_);
 		element_.dispatchEvent(_event);
 	},
@@ -241,15 +396,15 @@
 
 			// set touchlists containing single touches
 
-			if (oOptions_.touches) { 
+			if (oOptions_.touches) {
 				_oData.touches = _createTouchList(element_,oOptions_.touches);
 			}
 
-			if (oOptions_.changedTouches) { 
+			if (oOptions_.changedTouches) {
 				_oData.changedTouches = _createTouchList(element_,oOptions_.changedTouches);
 			}
 
-			if (oOptions_.targetTouches) { 
+			if (oOptions_.targetTouches) {
 				_oData.targetTouches = _createTouchList(element_,oOptions_.targetTouches);
 			}
 
@@ -380,7 +535,8 @@
 	 * Public API
 	 */
 	return {
-
+		doGenericSwipe:_doGenericSwipe,
+		doGenericGesture:_doGenericGesture,
 		/**
 		 * Triggers a predefined swipe gesture.
 		 * Direction: up
@@ -389,7 +545,7 @@
 		 * @return {Void}
 		 */
 		swipeUp : function (element_) {
-			_genericSwipe( element_, [{ identifier: 1, pageY:300 }], [{ identifier: 1, pageY: 0 }], {} );
+			_genericSwipe( element_, [{ identifier: 1, pageY:300 }], [{ identifier: 1, pageY: 0 }], { duration : 500 } );
 		},
 
 		/**
@@ -400,7 +556,7 @@
 		 * @return {Void}
 		 */
 		swipeRight : function (element_) {
-			_genericSwipe( element_, [{ identifier: 2, pageX:0 }],  [{ identifier: 2, pageX: 300 }], {} );
+			_genericSwipe( element_, [{ identifier: 2, pageX:0 }],  [{ identifier: 2, pageX: 300 }], { duration : 500 } );
 		},
 
 		/**
@@ -411,7 +567,7 @@
 		 * @return {Void}
 		 */
 		swipeDown :	function (element_) {
-			_genericSwipe( element_, [{ identifier: 3, pageY:0 }], [{ identifier: 3, pageY: 300 }], {} );
+			_genericSwipe( element_, [{ identifier: 3, pageY:0 }], [{ identifier: 3, pageY: 300 }], { duration : 500 } );
 		},
 
 		/**
@@ -422,7 +578,7 @@
 		 * @return {Void}
 		 */
 		swipeLeft :	function (element_) {
-			_genericSwipe( element_, [{ identifier: 3, pageX:300 }], [{ identifier: 3, pageX: 0 }], {} );
+			_genericSwipe( element_, [{ identifier: 3, pageX:300 }], [{ identifier: 3, pageX: 0 }], { duration : 500 } );
 		},
 
 		/**
@@ -459,7 +615,7 @@
 		 * rotation
 		 * pageX
 		 * pageY
-		 *
+		 * duration in ms
 		 * @return {Void}
 		 */
 		swipe : function (element_, _aStart, _aEnd, _oEvent) {
@@ -474,7 +630,7 @@
 		 * @return {Void}
 		 */
 		rotateLeft: function(element_) {
-			_genericGesture( element_, { rotation:0 }, { rotation: 270 }, {} );
+			_genericGesture( element_, { rotation:0 }, { rotation: 270 }, { duration : 500 } );
 		},
 
 		/**
