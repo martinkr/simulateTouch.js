@@ -5,11 +5,11 @@
  * *.simulateTouch: enhance your automated tests by simulate touches and gestures!
  *
  *
- * @Version: 1.1.0
+ * @Version: 2.0.0-alpha
  *
  * @example:
  *
- * Copyright (c) 2010-2013 Martin Krause (jquery.public.mkrause.info)
+ * Copyright (c) 2010-2014 Martin Krause (jquery.public.mkrause.info)
  * Dual licensed under the MIT and GPL licenses.
  *
  * @author Martin Krause public@mkrause.info
@@ -22,14 +22,17 @@
 
 /* add duration via settimeout */
 /* tap double tap lond press two finger tap*/
-/* jshint browser:true, jquery:true, strict: false, smarttabs:true, onevar:true, undef:true, unused:true, curly:true, latedef: true, sub:true */
+/* jshint browser:true, strict: false, smarttabs:true, onevar:true, undef:true, unused:true, curly:true, latedef: true, sub:true */
 /* global jQuery:true, $:true */
 
 (function(root_) {
+
 	root_.simulateTouch = function() {
 
+	"use strict";
+
 	var
-		_iIdentifier = 9999,
+		_iIdentifier = 9999, //new Date().getTime(),
 		_id = 1,
 		_oQueue = {},
 		_timer =null,
@@ -44,34 +47,36 @@
 	 * @param  {Object} _oEvent	Contains the details for the event itself.
 	 * @return {Void}
 	 */
-	_genericSwipe = function(element_, aStart_, aEnd_, oEvent_) {
+	_genericEvent = function(element_, aStart_, aEnd_, oEvent_) {
 
-		var _iDuration  = oEvent_.duration || 60 ;
+		var _iDuration  = oEvent_.duration || 60,
+			_sType  = oEvent_.type || 'touch' ;
 
 		// check for necessary information
 		if(!aStart_.length) { throw new Error('simulateTouch.js: no touches specified');}
 		if(aStart_.length !== aEnd_.length) { throw new Error('simulateTouch.js: start and end need same amount of touches');}
 
 		delete oEvent_.duration;
+		delete oEvent_.type;
 
 		// construct queue for all events
 		_oQueue[++_id] =  {
 			id: _id,
+			type : _sType,
 			phase : 0,
 			counter: Math.ceil(_iDuration / 20) ,
 			duration : _iDuration,
 			steps :  Math.ceil(_iDuration / 20) ,
-			fn: 'doGenericSwipe',
+			fn: 'doGenericEvent',
 			args : {
 				element : element_,
 				aStart : aStart_,
 				aEnd : aEnd_,
 				oEvent : oEvent_
 			}
-
 		};
-		// _doGenericSwipe.apply(this,_oQueue[_id].args);
-		// _doGenericSwipe(element_, aStart_, aEnd_, oEvent_,_id);
+		// _doGenericEvent.apply(this,_oQueue[_id].args);
+		// _doGenericEvent(element_, aStart_, aEnd_, oEvent_,_id);
 		_setInterval();
 	},
 
@@ -83,9 +88,10 @@
 	_setInterval = function () {
 		if (_timer) { return; }
 		_timer = setInterval(function(){
-			console.log('tick item ins queue: ', Object.keys(_oQueue).length)
+			// console.log('tick item in queue: ', Object.keys(_oQueue).length)
 			if (Object.keys(_oQueue).length) {
 				Object.keys(_oQueue).forEach(function(id_) {
+					// console.log('tick item #',_oQueue[id_], ' with function : ',_oQueue[id_].fn)
 					root_.simulateTouch[_oQueue[id_].fn](_oQueue[id_]);
 				});
 			} else {
@@ -101,16 +107,17 @@
 	 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
 	 * @param  {Object} _oEvent	Contains the details for the event itself.
 	 */
-	_doGenericSwipe = function(oOptions_) {
+	_doGenericEvent = function(oOptions_) {
 
 		var
 			_aTouches = [],
-			_aProp = ['screenX','screenY','pageX','pageY'],
+			_aPropCalculation = ['screenX','screenY','pageX','pageY','rotation','scale'],
 			_oEvent = oOptions_.args.oEvent || {},
 			_aStart = oOptions_.args.aStart,
 			_aEnd = oOptions_.args.aEnd,
 			_aMove = [],
-			element_ = oOptions_.args.element
+			element_ = oOptions_.args.element,
+			_sType = oOptions_.type
 		;
 
 		// decrease calls
@@ -152,11 +159,23 @@
 				oOptions_._aMove = _aMove  ;
 
 				// touchstart: toches == changedTouches == targetTouches
-				_oEvent.type = 'touchstart';
-				_oEvent.touches = _aTouches;
-				_oEvent.changedTouches = _aTouches;
-				_oEvent.targetTouches = _aTouches;
+				if(_sType === 'touch') {
+					_oEvent.type = 'touchstart';
+					_oEvent.touches = _aTouches;
+					_oEvent.changedTouches = _aTouches;
+					_oEvent.targetTouches = _aTouches;
+				}
 
+				// gesture events doesn't have touchlists -
+				// we're taking the rotation & scale from the first array
+				if(_sType === 'gesture') {
+					_oEvent.type = 'gesturestart';
+					_oEvent.rotation = _aStart[0].rotation;
+					_oEvent.scale = _aStart[0].scale;
+				}
+
+				// one call left, send *move next
+				oOptions_.trigger = true;
 				oOptions_.phase++;
 
 			break;
@@ -167,28 +186,39 @@
 				_aTouches = [];
 				// grab clone
 				_aMove = oOptions_._aMove;
+
 				// calculate movement
 				_aMove.forEach(function (oItem_, i_){
-					_aProp.forEach(function (sProp_) {
+					_aPropCalculation.forEach(function (sProp_) {
 						var _iStepDelta = 0,
-						_iDirection = (_aStart[i_][sProp_] > _aEnd[i_][sProp_]) ? -1 : +1 ;
-						if(_aMove[i_][sProp_] ) {
+							_iDirection
+						;
+						if(_aStart[i_][sProp_] !== undefined  && _aEnd[i_][sProp_] !== undefined ) {
+							_iDirection = (_aStart[i_][sProp_] > _aEnd[i_][sProp_]) ? -1 : +1 ;
 							_iStepDelta = Math.abs(_aStart[i_][sProp_] - _aEnd[i_][sProp_]) / oOptions_.steps;
 							_aMove[i_][sProp_] += ( _iDirection * (_iStepDelta) );
 							// console.log(' ---- ')
-							// console.log(oOptions_.counter,_aStart[i_][sProp_] ,_aEnd[i_][sProp_], ' ---- move to ', _iDirection , (_iStepDelta), ' to ', _aMove[i_][sProp_])
+							// console.log('counter', oOptions_.counter,'_aStart', sProp_, _aStart[i_][sProp_] , '_aEnd', sProp_, _aEnd[i_][sProp_], ' ---- move in _iDirection', _iDirection , 'by ',(_iStepDelta), ' - current position: ', _aMove[i_][sProp_])
 						}
 					});
 					_aTouches.push( _aMove[i_] );
 				});
 
 				// touchmove: toches == changedTouches == targetTouches
-				_oEvent.type = 'touchmove';
-				_oEvent.touches = _aTouches;
-				_oEvent.changedTouches = _aTouches;
-				_oEvent.targetTouches = _aTouches;
+				if(_sType === 'touch') {
+					_oEvent.type = 'touchmove';
+					_oEvent.touches = _aTouches;
+					_oEvent.changedTouches = _aTouches;
+					_oEvent.targetTouches = _aTouches;
+					oOptions_.trigger = true;
+				}
 
-				// one call left, send touchend next
+				// gesture events doesn't have a move event
+				if(_sType === 'gesture') {
+					oOptions_.trigger = false;
+				}
+
+				// one call left, send *end next
 				if (oOptions_.counter === 1 ) {oOptions_.phase++;}
 
 			break;
@@ -203,12 +233,23 @@
 				});
 
 				// touchend: changedTouches only
-				_oEvent.type = 'touchend';
-				_oEvent.touches = [];
-				_oEvent.changedTouches = _aTouches;
-				_oEvent.targetTouches = [];
+				if(_sType === 'touch') {
+					_oEvent.type = 'touchend';
+					_oEvent.touches = [];
+					_oEvent.changedTouches = _aTouches;
+					_oEvent.targetTouches = [];
+				} 
+
+				// gesture events doesn't have touchlists -
+				// we're taking the rotation & scale from the first array
+				if(_sType === 'gesture') {
+					_oEvent.type = 'gestureend';
+					_oEvent.rotation = _aEnd[0].rotation;
+					_oEvent.scale = _aEnd[0].scale;
+				}
 
 				// done for this id
+				oOptions_.trigger = true;
 				delete _oQueue[oOptions_.id];
 
 			break;
@@ -216,93 +257,13 @@
 		}
 
 		// fire!
-		_triggerTouch(element_, _oEvent);
-
-	},
-
-
-	/**
-	 * simulates a gesture
-	 * @param  {[type]} element_  [description]
-	 * @param  {[type]} oStart_   [description]
-	 * @param  {[type]} oEnd_	[description]
-	 * @param  {[type]} iTouches_ [description]
-	 * @return {[type]}	[description]
-	 */
-	_genericGesture = function(element_, oStart_, oEnd_, oEvent_) {
-
-		var _oEvent = oEvent_ || {}
-		;
-
-		// fire gesturestart
-
-		_oEvent.type = 'gesturestart';
-		_oEvent.rotation = oStart_.rotation;
-		_oEvent.bubbles = oEvent_.bubbles || true;
-		_oEvent.scale = oStart_.scale;
-		_triggerTouch(element_, oEvent_);
-
-		// fire gestureend
-		_oEvent.type = 'gestureend';
-		_oEvent.bubbles = oEvent_.bubbles || true;
-		_oEvent.rotation = oEnd_.rotation;
-		_oEvent.scale = oEnd_.scale;
-		_triggerTouch(element_, oEvent_);
-
-	},
-
-	_doGenericGesture = function(oOptions_) {
-
-		var
-			_aTouches = [],
-			_aProp = ['screenX','screenY','pageX','pageY'],
-			_oEvent = oOptions_.args.oEvent || {},
-			_aStart = oOptions_.args.aStart,
-			_aEnd = oOptions_.args.aEnd,
-			_aMove = [],
-			element_ = oOptions_.args.element
-		;
-
-		// decrease calls
-		oOptions_.counter--;
-
-		// decide which touch should be fired
-		switch (oOptions_.phase) {
-
-			// start: once
-			case 0:
-
-				// one call left, send touchend next
-				if (oOptions_.counter === 1 ) {oOptions_.phase++;}
-
-			break;
-
-			// end: once
-			case 2:
-				// fire touchend with all touchpoints
-				_aTouches = [];
-				_aEnd.forEach(function (oItem_, i_){
-					_aEnd[i_].identifier = ( !_aEnd[i_].identifier ) ? _aStart[i_].identifier : _aEnd[i_].identifier;
-					_aTouches.push( _aEnd[i_] );
-				});
-
-				// touchend: changedTouches only
-				_oEvent.type = 'touchend';
-				_oEvent.touches = [];
-				_oEvent.changedTouches = _aTouches;
-				_oEvent.targetTouches = [];
-
-				// done for this id
-				delete _oQueue[oOptions_.id];
-
-			break;
-
+		if ( oOptions_.trigger === true ) {
+			_triggerEvent(element_, _oEvent);
 		}
 
-		// fire!
-		_triggerTouch(element_, _oEvent);
-
 	},
+
+
 
 	/**
 	 * Dispatches the created touch event
@@ -312,9 +273,9 @@
 	 * @param  {Object} oOptions_ The properties describing the event.
 	 * @return {Void}
 	 */
-	_triggerTouch = function(element_,oOptions_) {
+	_triggerEvent = function(element_,oOptions_) {
 		// touchend: changedTouches only
-		console.log('## TRIGGER TOUCH', oOptions_.type,arguments)
+		// console.log('## TRIGGER TOUCH', oOptions_.type,arguments)
 		var _event = _setupEvent(element_,oOptions_);
 		element_.dispatchEvent(_event);
 	},
@@ -387,6 +348,8 @@
 		_oData.metaKey = oOptions_.metaKey || false;
 		_oData.scale = oOptions_.scale || 1;
 		_oData.rotation = oOptions_.rotation || 0;
+		_oData.clientX = _oData.clientX || 0;
+		_oData.clientY = _oData.clientY || 0;
 		// implemented but not part of the specs
 		_oData.pageX = oOptions_.pageX || _oData.clientX  + window.pageXOffset;
 		_oData.pageY = oOptions_.pageY || _oData.clientY  + window.pageYOffset;
@@ -419,7 +382,6 @@
 
 		// gesture events: no touchlists!
 		if(oOptions_.type.indexOf('gesture')!==-1){
-
 			// create event
 			_event = document.createEvent('GestureEvent');
 			// initialize event with all necessary options
@@ -490,7 +452,7 @@
 			_i,
 			_iLength =  oOptions_.length,
 			_oDefault = {
-				identifier : oOptions_.identifier || 1,
+				identifier : oOptions_.identifier || false,
 				target: element_,
 				screenX: oOptions_.screenX || 0,
 				screenY: oOptions_.screenY || 0,
@@ -535,8 +497,12 @@
 	 * Public API
 	 */
 	return {
-		doGenericSwipe:_doGenericSwipe,
-		doGenericGesture:_doGenericGesture,
+
+		/**
+		 * Process a generic event. API for the timeout etc
+		 */
+		doGenericEvent:_doGenericEvent,
+
 		/**
 		 * Triggers a predefined swipe gesture.
 		 * Direction: up
@@ -545,7 +511,7 @@
 		 * @return {Void}
 		 */
 		swipeUp : function (element_) {
-			_genericSwipe( element_, [{ identifier: 1, pageY:300 }], [{ identifier: 1, pageY: 0 }], { duration : 500 } );
+			_genericEvent( element_, [{ pageY:300 }], [{ pageY: 0 }], { duration : 500 } );
 		},
 
 		/**
@@ -556,7 +522,7 @@
 		 * @return {Void}
 		 */
 		swipeRight : function (element_) {
-			_genericSwipe( element_, [{ identifier: 2, pageX:0 }],  [{ identifier: 2, pageX: 300 }], { duration : 500 } );
+			_genericEvent( element_, [{ pageX:0 }],  [{ pageX: 300 }], { duration : 500 } );
 		},
 
 		/**
@@ -567,7 +533,7 @@
 		 * @return {Void}
 		 */
 		swipeDown :	function (element_) {
-			_genericSwipe( element_, [{ identifier: 3, pageY:0 }], [{ identifier: 3, pageY: 300 }], { duration : 500 } );
+			_genericEvent( element_, [{ pageY:0 }], [{ pageY: 300 }], { duration : 500 } );
 		},
 
 		/**
@@ -578,11 +544,11 @@
 		 * @return {Void}
 		 */
 		swipeLeft :	function (element_) {
-			_genericSwipe( element_, [{ identifier: 3, pageX:300 }], [{ identifier: 3, pageX: 0 }], { duration : 500 } );
+			_genericEvent( element_, [{ pageX:300 }], [{ pageX: 0 }], { duration : 500 } );
 		},
 
 		/**
-		 * Triggers a generic swipe gesture.
+		 * Triggers a generic touch event (touchstart, touchmove, touchend)
 		 * @param  {HTML-Element}	element_ Element to trigger events on
 		 * @param  {Array} _aStart	Array of Objects. Each object contains the details for a single touchpoint's start position.
 		 * @param  {Array} _aEnd	Array of Objects. Each object contains the details for a single touchpoint's end position.
@@ -618,8 +584,9 @@
 		 * duration in ms
 		 * @return {Void}
 		 */
-		swipe : function (element_, _aStart, _aEnd, _oEvent) {
-			_genericSwipe(element_, _aStart, _aEnd, _oEvent);
+		touch : function (element_, _aStart, _aEnd, _oEvent) {
+			_oEvent.type = 'touch';
+			_genericEvent(element_, _aStart, _aEnd, _oEvent);
 		},
 
 		/**
@@ -630,7 +597,7 @@
 		 * @return {Void}
 		 */
 		rotateLeft: function(element_) {
-			_genericGesture( element_, { rotation:0 }, { rotation: 270 }, { duration : 500 } );
+			_genericEvent( element_, [{ rotation:0 }], [{ rotation: 270}], { duration : 500, type:'gesture'} );
 		},
 
 		/**
@@ -641,7 +608,7 @@
 		 * @return {Void}
 		 */
 		rotateRight: function(element_) {
-			_genericGesture( element_, { rotation:0 }, { rotation: 90 }, {} );
+			_genericEvent( element_, { rotation:0 }, { rotation: 90 }, { duration : 500, type:'gesture'} );
 		},
 
 		/**
@@ -652,7 +619,7 @@
 		 * @return {Void}
 		 */
 		pinchOpen: function(element_) {
-			_genericGesture( element_, { scale:1 }, { scale: 1.5 }, {} );
+			_genericEvent( element_, { scale:1 }, { scale: 1.5 }, { duration : 500, type:'gesture'} );
 		},
 
 		/**
@@ -663,17 +630,17 @@
 		 * @return {Void}
 		 */
 		pinchClose: function(element_) {
-			_genericGesture( element_, { scale:1 }, { scale: 0.5 }, {} );
+			_genericEvent( element_, { scale:1 }, { scale: 0.5 }, { duration : 500, type:'gesture' } );
 		},
 
 		/**
 		 * Triggers a generic gesture.
 		 * @param  {HTML-Element}	element_ Element to trigger events on
-		 * @param  {Array} _oStart	An Object containing the details for the gestures start position.
-		 * @param  {Array} _oEnd	An Object containing the details for the gestures end position.
+		 * @param  {Array} _aStart	Array with one Object which contains the gestures start position.
+		 * @param  {Array} _aEnd	Array one Objects which contains the gestures end position.
 		 * @param  {Object} _oEvent	Contains the details for the event itself.
 		 *
-		 * properties for a single touchpoint
+		 * properties for the gesture
 		 * rotation
 		 * scale
 		 *
@@ -690,7 +657,8 @@
 		 * @return {Void}
 		 */
 		gesture: function (element_, oStart_, oEnd_, oEvent_ ) {
-			_genericGesture( element_, oStart_, oEnd_, oEvent_);
+			oEvent_.type = 'gesture';
+			_genericEvent( element_, oStart_, oEnd_, oEvent_);
 		}
 
 	};

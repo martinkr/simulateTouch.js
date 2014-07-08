@@ -10,12 +10,12 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
 	simulateTouch.swipeRight(element);
 	simulateTouch.swipeDown(element);
 	simulateTouch.swipeLeft(element);
-	simulateTouch.swipe(element,aStart,aEnd,oEvent);
+	simulateTouch.touch(element,aStart,aEnd,oEvent);
 	simulateTouch.rotateLeft(element_)
 	simulateTouch.rotateRight(element_)
 	simulateTouch.pinchOpen(element_)
 	simulateTouch.pinchClose(element_)
-	simulateTouch.gesture (element_, oStart_, oEnd_, oEvent_ )
+	simulateTouch.gesture(element_, aStart_, aEnd_, oEvent_ )
 </pre>
 
 
@@ -47,7 +47,7 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
 
 ## Generic Swipe
 
-### simulateTouch.swipe
+### simulateTouch.touch
 - @param  {HTML-Element} element_ Element to trigger events on
 - @param  {Array} _aStart Array of Objects. Each object contains the details for a single touchpoint's start position.
 - @param  {Array} _aEnd Array of Objects. Each object contains the details for a single touchpoint's end position.
@@ -97,8 +97,8 @@ Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behav
 
 ### simulateTouch.gesture
  - @param  {HTML-Element}	element_ Element to trigger events on
- - @param  {Array} _oStart	An Object containing the details for the gestures start position.
- - @param  {Array} _oEnd	An Object containing the details for the gestures end position.
+ - @param  {Array} _aStart	Array with one Object which contains the gestures start position.
+ - @param  {Array} _aEnd	Array one Objects which contains the gestures end position.
  - @param  {Object} _oEvent	Contains the details for the event itself.
 
 #### properties for the  start / end Object
