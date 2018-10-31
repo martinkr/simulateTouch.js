@@ -2,7 +2,7 @@
 =======
 Enhance your automated tests by simulate touches and gestures!
 
-Works like a charm with Jasmine (http://pivotal.github.com/jasmine/) the a behavior-driven development framework for testing JavaScript code.
+Works like a charm with Jasmine (https://jasmine.github.io/) the a behavior-driven development framework for testing JavaScript code.
 
 ## Example
 <pre>
